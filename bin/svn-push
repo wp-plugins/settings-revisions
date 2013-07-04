@@ -4,11 +4,11 @@ set -e
 
 cd $(dirname $0)/..
 
-#if [ -n "$(git status -s -uno)" ]; then
-#	git status
-#	echo "Error: Git state has modified or staged files. Commit or reset." >&2
-#	exit 1
-#fi
+if [ -n "$(git status -s -uno)" ]; then
+	git status
+	echo "Error: Git state has modified or staged files. Commit or reset." >&2
+	exit 1
+fi
 
 git_root=$(pwd)
 
@@ -66,6 +66,6 @@ fi
 
 cd $svn_repo_dir
 
-#svn commit -F $svn_commit_file
+svn commit -F $svn_commit_file
 
-#rm $svn_commit_file
+rm $svn_commit_file
