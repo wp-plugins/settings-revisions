@@ -56,6 +56,10 @@ Requires PHP 5.3!
 
 ## Changelog ##
 
+### 0.1.1 ###
+Eliminate strict standards notice
+Fix customizer control
+
 ### 0.1.0 ###
 First Release
 
