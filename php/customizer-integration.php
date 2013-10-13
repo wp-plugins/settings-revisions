@@ -1,8 +1,6 @@
 <?php
 
-namespace Settings_Revisions;
-
-class Customizer_Integration {
+class Settings_Revisions_Customizer_Integration {
 	public $plugin = null;
 	public $ajax_latest_dropdown_options_action = 'settings_revisions_latest_dropdown_options';
 
@@ -47,10 +45,13 @@ class Customizer_Integration {
 		global $wp_customize;
 
 		$section_name = 'settings-revisions';
-		$wp_customize->add_section( $section_name, array(
-			'title'    => __( 'Settings Revisions', 'settings-revisions' ),
-			'priority' => 1,
-		) );
+		$wp_customize->add_section(
+			$section_name,
+			array(
+				'title'    => __( 'Settings Revisions', 'settings-revisions' ),
+				'priority' => 1,
+			)
+		);
 
 		$wp_customize->add_setting(
 			'settings_revision_meta',
@@ -60,24 +61,23 @@ class Customizer_Integration {
 				'type'      => 'custom', // not a theme_mod or an option
 			)
 		);
-		$wp_customize->add_control(
-			new Meta_Control(
-				$this->plugin,
-				$wp_customize,
-				'settings_revision_meta',
-				array(
-					'section'  => $section_name,
-					'settings' => 'settings_revision_meta',
-				)
+		$control = new Settings_Revisions_Meta_Control(
+			$this->plugin,
+			$wp_customize,
+			'settings_revision_meta',
+			array(
+				'section'  => $section_name,
+				'settings' => 'settings_revision_meta',
 			)
 		);
+		$wp_customize->add_control( $control );
 
 	}
 
 	/**
 	 *
 	 */
-	function on_customize_save( \WP_Customize_Manager $manager ) {
+	function on_customize_save( WP_Customize_Manager $manager ) {
 		$meta = $manager->get_setting( 'settings_revision_meta' )->post_value();
 
 		$args = array(
@@ -88,7 +88,7 @@ class Customizer_Integration {
 			'settings' => array(),
 		);
 
-		foreach ($manager->settings() as $setting) {
+		foreach ( $manager->settings() as $setting ) {
 			if ( in_array( $setting->type, array( 'theme_mod', 'option' ) ) ) {
 				$args['settings'][] = array(
 					'id'    => $setting->id,
@@ -112,7 +112,7 @@ class Customizer_Integration {
 		if ( isset( $_REQUEST['before_post_id'] ) && is_numeric( $_REQUEST['before_post_id'] ) ) {
 			$args['before_post_id'] = (int)$_REQUEST['before_post_id'];
 		}
-		echo $this->plugin->post_type->get_dropdown_contents( $args );
+		echo $this->plugin->post_type->get_dropdown_contents( $args ); // xss ok
 		exit;
 	}
 }

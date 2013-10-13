@@ -1,14 +1,12 @@
 <?php
 
-namespace Settings_Revisions;
-
-class Settings_Filtering {
+class Settings_Revisions_Preview_Filtering {
 
 	public $plugin;
 
 	function __construct( $args = array() ) {
 		$args = wp_parse_args( $args, get_object_vars( $this ) );
-		foreach ($args as $key => $value) {
+		foreach ( $args as $key => $value ) {
 			$this->$key = $value;
 		}
 
@@ -27,7 +25,7 @@ class Settings_Filtering {
 			return;
 		}
 
-		foreach( $active_settings as $setting ) {
+		foreach ( $active_settings as $setting ) {
 			$setting = (object)$setting;
 
 			// Parse the ID for array keys.
@@ -40,14 +38,10 @@ class Settings_Filtering {
 				$id .= '[' . implode( '][', $id_keys ) . ']';
 			}
 
-			/**
-			 * Callback function to filter the theme mods and options.
-			 */
-			$filter = function ( $original ) use ( $id_keys, $setting, $self ) {
-				return $self->multidimensional_replace( $original, $id_keys, $setting->value );
-			};
-
-			switch( $setting->type ) {
+			$filter = array( $this, '_setting_filter' );
+			$this->_filtering_id_keys = $id_keys;
+			$this->_filtering_setting = $setting;
+			switch ( $setting->type ) {
 				case 'theme_mod' :
 					add_filter( 'theme_mod_' . $id_base, $filter );
 					break;
@@ -61,10 +55,18 @@ class Settings_Filtering {
 					break;
 			}
 		}
-
-		//error_log($_SERVER['REQUEST_URI']);
-		//error_log(print_r($active_settings, true));
 	}
+
+	/**
+	 * Callback function to filter the theme mods and options.
+	 * In PHP 5.3 we wouldn't need this
+	 */
+	protected function _setting_filter( $original ) {
+		return $this->multidimensional_replace( $original, $this->_filtering_id_keys, $this->_filtering_setting );
+	}
+
+	protected $_filtering_id_keys;
+	protected $_filtering_setting;
 
 	/******************************************************************************
 	 * Begin functions copied from WP_Customize_Setting class
@@ -123,7 +125,7 @@ class Settings_Filtering {
 	 * @param $root
 	 * @param $keys
 	 * @param mixed $value The value to update.
-	 * @return
+	 * @return mixed
 	 */
 	final function multidimensional_replace( $root, $keys, $value ) {
 		if ( ! isset( $value ) )
@@ -146,7 +148,7 @@ class Settings_Filtering {
 	 *
 	 * @param $root
 	 * @param $keys
-	 * @param $default A default value which is used as a fallback. Default is null.
+	 * @param mixed $default A default value which is used as a fallback. Default is null.
 	 * @return mixed The requested value or the default value.
 	 */
 	final function multidimensional_get( $root, $keys, $default = null ) {

@@ -1,7 +1,5 @@
 <?php
 
-namespace Settings_Revisions;
-
 require_once ABSPATH . WPINC . '/class-wp-customize-control.php';
 
 /**
@@ -10,13 +8,13 @@ require_once ABSPATH . WPINC . '/class-wp-customize-control.php';
  * @package WordPress
  * @subpackage Customize
  */
-class Meta_Control extends \WP_Customize_Control {
+class Settings_Revisions_Meta_Control extends WP_Customize_Control {
 	public $plugin;
 
 	/**
 	 * @var string
 	 */
-	public $type = 'SettingsRevisionsMetaControl';
+	public $type = 'settings_revisions_meta';
 
 	/**
 	 * @var array
@@ -31,11 +29,12 @@ class Meta_Control extends \WP_Customize_Control {
 	 * @since 3.4.0
 	 * @uses WP_Customize_Control::__construct()
 	 *
+	 * @param Plugin $plugin
 	 * @param WP_Customize_Manager $manager
 	 * @param string $id
 	 * @param array $args
 	 */
-	public function __construct( Plugin $plugin, \WP_Customize_Manager $manager, $id, $args = array() ) {
+	function __construct( Settings_Revisions_Plugin $plugin, WP_Customize_Manager $manager, $id, $args = array() ) {
 		$this->plugin = $plugin;
 		parent::__construct( $manager, $id, $args );
 		add_action( 'customize_controls_enqueue_scripts', array( $this, 'enqueue_deps' ) );
@@ -62,11 +61,12 @@ class Meta_Control extends \WP_Customize_Control {
 			array(),
 			$this->plugin->get_version()
 		);
-		wp_localize_script('settings-revisions-meta-control', 'SettingsRevisionsMetaControl_exported', array(
+		$exports = array(
 			'l10n'                                     => $this->l10n,
 			'latest_revisions_dropdown_options_action' => $this->plugin->customizer_integration->ajax_latest_dropdown_options_action,
 			'latest_revisions_dropdown_options_nonce'  => wp_create_nonce( $this->plugin->customizer_integration->ajax_latest_dropdown_options_action ),
-		));
+		);
+		wp_localize_script( 'settings-revisions-meta-control', 'SettingsRevisionsMetaControl_exported', $exports );
 	}
 
 	/**
@@ -87,14 +87,9 @@ class Meta_Control extends \WP_Customize_Control {
 		?>
 
 		<label>
-			<span class="customize-control-title"><?php echo esc_html_e( 'Active Revision:', 'settings-revisions' ) ?></span>
+			<span class="customize-control-title"><?php esc_html_e( 'Active Revision:', 'settings-revisions' ) ?></span>
 			<select class="active">
-				<?php $options = $this->plugin->post_type->get_dropdown_contents( $query_vars ) ?>
-				<?php if ( $options ) : ?>
-					<?php echo $options; ?>
-				<?php else : ?>
-					<option value=""><?php esc_html_e( 'Default Settings', 'settings-revisions' ) ?></option>
-				<?php endif; ?>
+				<?php echo $this->plugin->post_type->get_dropdown_contents( $query_vars ); // xss ok ?>
 			</select>
 		</label>
 
@@ -127,8 +122,8 @@ class Meta_Control extends \WP_Customize_Control {
 
 			<p class="field comment">
 				<label>
-					<span class="customize-control-title"><?php echo esc_html_e( 'Comment:', 'settings-revisions' ) ?></span>
-					<span class="customize-control-content"><input type="text" class="value" value="<?php echo esc_attr( $active_post ? get_the_title( $active_post ) : '' ) ?>" title="<?php esc_attr_e( 'Provide a descriptive note about this revision', 'settings-revisions' ) ?>" maxlength="65535"></span>
+					<span class="customize-control-title"><?php esc_html_e( 'Comment:', 'settings-revisions' ) ?></span>
+					<span class="customize-control-content"><input type="text" class="value" value="<?php echo esc_attr( $active_post ? get_the_title( $active_post_id ) : '' ) ?>" title="<?php esc_attr_e( 'Provide a descriptive note about this revision', 'settings-revisions' ) ?>" maxlength="65535"></span>
 				</label>
 			</p>
 		</div>
