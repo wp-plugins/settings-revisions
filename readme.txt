@@ -1,5 +1,5 @@
 === Settings Revisions ===
-Contributors:      X-team, westonruter, kucrut
+Contributors:      xwp, westonruter, kucrut
 Tags:              customizer, customize, options, settings, theme-mods, revisions, versioning, revert, styles
 Requires at least: 3.7
 Tested up to:      3.8
